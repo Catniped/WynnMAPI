@@ -138,5 +138,3 @@ fs.readFile('C:\\Users\\PC\\Documents\\GitHub\\WynnMAPI\\map1.json', 'utf8', (er
   console.log(terrs);
   
 });
-
-
