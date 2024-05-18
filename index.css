@@ -1,0 +1,21 @@
+#map {
+    background-color: #333333;
+}
+
+.terrInfo {
+    padding: 6px 2vw;
+    font-family: Poppins;
+    background: #262626;
+    -webkit-text-fill-color: antiquewhite;
+    box-shadow: 2px 2px 4px black;
+    border-radius: 5px;
+    text-shadow: 1px 1px 4px black;
+}
+
+.terrInfo h1 {
+    text-align: center;
+}
+
+.terrInfo h2 {
+    text-align: right;
+}
