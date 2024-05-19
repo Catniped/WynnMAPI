@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   terrInfo.update = function (terrData) {
     this._div.innerHTML = 
-    `<h1>${terrData.name}</h1>\
+    terrData ? `<h1>${terrData.name}</h1>\
     <h2 style="-webkit-text-fill-color: ${terrData.guildColor}">${terrData.guild} [${terrData.guildTag}]</h2>\
     <h2 style="-webkit-text-fill-color: #39ac39">+${terrData.emProd} Emeralds</h2>\
     <h2 style="-webkit-text-fill-color: #39ac39">${terrData.emStorage} Emeralds Stored</h2>\
@@ -39,23 +39,23 @@ document.addEventListener('DOMContentLoaded', function () {
     <h2 style="-webkit-text-fill-color: #ffc34d">${terrData.cropStorage} Crops Stored</h2>\
     <h2>Treasury: <span style="-webkit-text-fill-color: ${getDifficultyColor(terrData.treasury)}">${terrData.treasury}</span></h2>\
     <h2>Defences: <span style="-webkit-text-fill-color: ${getDifficultyColor(terrData.defences)}">${terrData.defences}</span></h2>\
-    `;
+    `: "";
   };
 
-  terrInfo.reset = function () {
-    this._div.innerHTML = "";
-  };
+  var focused = "";
 
   function setData(e) {
+    if (e.target.options.terrObj.name != focused) {focused = ""};
     terrInfo.update(e.target.options.terrObj);
   };
 
   function resetData(e) {
-    terrInfo.reset();
+    if (!focused) {terrInfo.update()};
   };
 
   function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
+    focused = e.target.options.terrObj.name;
   };
 
   terrInfo.onAdd = function (map) {
@@ -68,11 +68,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var bounds = [[-6573,-2383], [-160,1650]];
   var image = L.imageOverlay('main-map.png', bounds).addTo(map);
  
-  
+  var terrPolygons = {};
 
-  axios.get('http://localhost:3000/hybridData')
+  axios.get('http://localhost:3000/dummyData')
     .then(response => {
       terrs = response.data;
+      // draw terr outlines
       for (i=0;i<terrs.length;i++) {
         let loc = terrs[i].location;
         let outline = new terrPolygon([[loc.startZ, loc.startX],[loc.startZ, loc.endX],[loc.endZ, loc.endX],[loc.endZ, loc.startX]], {color: terrs[i].guildColor, terrObj: terrs[i]});
@@ -80,6 +81,25 @@ document.addEventListener('DOMContentLoaded', function () {
         outline.on("mouseout", resetData);
         outline.on("click", zoomToFeature);
         outline.addTo(map);
+        terrPolygons[terrs[i].name] = outline;
+
+        let gTagOverlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        gTagOverlay.setAttribute('xmlns', "http://www.w3.org/2000/svg");
+        gTagOverlay.setAttribute(`viewBox`, `0 0 ${Math.abs(loc.startX - loc.endX)} ${Math.abs(loc.startZ - loc.endZ)}`);
+        gTagOverlay.innerHTML =`<text x="${Math.abs(loc.startX - loc.endX)*(0.04+(0.125*(4-terrs[i].guildTag.length)))}" y="${Math.abs(loc.startZ - loc.endZ)*0.6}" style="font: ${Math.abs(loc.startX - loc.endX)*0.35}px Poppins; fill: ${terrs[i].guildColor};">${terrs[i].guildTag}</text>`
+        L.svgOverlay(gTagOverlay, [[loc.startZ, loc.startX],[loc.endZ, loc.endX]]).addTo(map);
+      }
+      // draw conns
+      let renderedConns = [];
+      let terrPolygonsArray = Object.values(terrPolygons);
+      for (i=0;i<terrPolygonsArray.length;i++) {
+        for (p=0;p<terrPolygonsArray[i].options.terrObj.conns.length;p++) {
+          if (!renderedConns.includes(terrPolygonsArray[i].options.terrObj.conns[p])) {
+            L.polyline([terrPolygonsArray[i].getCenter(), terrPolygons[terrPolygonsArray[i].options.terrObj.conns[p]].getCenter()], {color: "white", weight: 1, opacity: 0.75}).addTo(map);
+          }
+          renderedConns.push(terrPolygonsArray[i].options.terrObj.name);
+        }
+        
       }
     });
   map.fitBounds(bounds);

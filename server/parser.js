@@ -1,3 +1,5 @@
+terrDataFile = require('./data/territories.js');
+
 class Territory {
   constructor() {
     this.name;
@@ -22,7 +24,7 @@ class Territory {
   }
 }
 
-function test() {
+function dummyData() {
   var terr = new Territory;
   terr.name = "Ragni Main Entrance"
   terr.guild = "empire of"
@@ -38,12 +40,16 @@ function test() {
   terr.cropProd = "3600"
   terr.cropStorage = "432/5353"
   terr.treasury = "Low"
-  terr.defences = "Very Low"
-  terr.conns = ["nuh", "uh"]
+  terr.defences = "Very High"
+  terr.conns = ["Ragni"]
   terr.location = {startX: 1000, startZ: 1000, endX: 0, endZ: 0}
   terr.acquired = "im not gonna bother"
   terr.guildColor = "#ccccff"
-  return([terr])
+  var terr2 = structuredClone(terr);
+  terr2.location = {startX: 1500, startZ: 1500, endX: 1000, endZ: 1000}
+  terr2.name = "Ragni"
+  terr2.conns = ["Ragni Main Entrance"]
+  return([terr2,terr])
 };
 
 function genHybridData(achievementData, apiData) {
@@ -170,5 +176,25 @@ function genHybridData(achievementData, apiData) {
   return(terrs);
 };
 
+function genApiData(apiData) {
+  let apiTerrs = apiData.data.territories;
+  let terrs = [];
+  for (terrNum = 1; terrNum < apiTerrs.length; terrNum++) {
+    let terr = new Territory();
+    
+    terr.name = apiTerrs[terrNum].name;
+    terr.guild = apiTerrs[terrNum].guild;
+    terr.guildTag = apiTerrs[terrNum].guildPrefix;
+    terr.acquired = apiTerrs[terrNum].acquired;
+    terr.guildColor = apiTerrs[terrNum].guildColor;
+
+    terr.conns = terrDataFile.territoryData[terrName].connections;
+    let terrLoc = apiTerrs[terrName].location;
+    terr.location = {startX: terrLoc.startX, startZ: terrLoc.startZ, endX: terrLoc.endX, endZ: terrLoc.endZ};
+    
+    terrs.push(terr);
+  }};
+
 exports.genHybridData = genHybridData;
-exports.test = test;
+exports.genApiData = genApiData;
+exports.dummyData = dummyData;
