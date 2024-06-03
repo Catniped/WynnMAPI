@@ -16,7 +16,7 @@ app.get('/hybridData', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     try {
     axios.get('https://athena.wynntils.com/cache/get/territoryList').then(response => {
-        let mapData = fs.readFileSync("./map1.json", 'utf8');
+        let mapData = fs.readFileSync("./data/map1.json", 'utf8');
         res.header("Access-Control-Allow-Origin", "*");
         res.send(parser.genHybridData(mapData, response));
     })} catch {

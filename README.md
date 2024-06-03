@@ -9,9 +9,10 @@ The website frontend is functional, with a few bugs/imperfections to be polishes
 
 This project is still under development, but is in a usable state, and i will start hosting the services as soon as i can. Everyone is free to contribute in the meantime.
 
-![An image of the map](https://github.com/Catniped/WynnMAPI/blob/36bb117b5fe800a04bc1b67774c918f3318f34ed/image%20(4).png)
+![An image of the map](https://github.com/Catniped/WynnMAPI/blob/a3fd767cacd96a554ee5754ad6acd91556e3168f/image.png)
 
 ## Usage
+### API
 All required dependencies for the API are listed in the `server.js` file, where you can also change the port used by the app. Once you've condigured everything, simply run `node server.js` in the server directory and the app should start.
 
 The API currently offers 3 endpoints:
@@ -20,7 +21,13 @@ The API currently offers 3 endpoints:
 Combines ingame data with Athena API data to generate the most accurate information about the map state possible. The ingame backend implementation is still TBD.
 
 **apiData**:
-Wraps the Athena API with some useful static additional info, like territory connections, territory externals (TBD), natural resource gen (TBD), and possibly other properties that may soon come. Mostly used by the website frontend as a substitute for the hybrid data.
+Wraps the Athena API with some useful static additional info, like territory connections, territory externals (TBD), natural resource gen, and possibly other properties that may soon come. Mostly used by the website frontend as a substitute for the hybrid data.
 
 **dummyData**:
 A testing endpoint, and example of how territory data is defined in this API. You can modify this/do whatever you'd like with it.
+
+### Website
+Specify the API location at the top of the `index.js` file, and you should be good to go!
+If you wanna use a different API endpoint, like `hybridData` (default is `apiData`), add it as a url parameter like this: 
+
+`https://url?data=hybridData`

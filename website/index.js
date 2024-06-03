@@ -1,3 +1,5 @@
+const endpoint = "http://localhost:3000/"
+
 document.addEventListener('DOMContentLoaded', function () {
   var CRSPixel = L.Util.extend(L.CRS.Simple, {
     transformation: new L.Transformation(1,0,1,0)
@@ -27,18 +29,18 @@ document.addEventListener('DOMContentLoaded', function () {
     this._div.innerHTML = 
     terrData ? `<h1>${terrData.name}</h1>\
     <h2 style="-webkit-text-fill-color: ${terrData.guildColor}">${terrData.guild} [${terrData.guildTag}]</h2>\
-    <h2 style="-webkit-text-fill-color: #39ac39">+${terrData.emProd} Emeralds</h2>\
-    <h2 style="-webkit-text-fill-color: #39ac39">${terrData.emStorage} Emeralds Stored</h2>\
+    ${terrData.emProd ? `<h2 style="-webkit-text-fill-color: #39ac39">+${terrData.emProd} Emeralds</h2>` : ""}\
+    ${terrData.emStorage ? `<h2 style="-webkit-text-fill-color: #39ac39">${terrData.emStorage} Emeralds Stored</h2>` : ""}\
     ${terrData.oreProd ? `<h2 style="-webkit-text-fill-color: #f2f2f2">+${terrData.oreProd} Ore</h2>` : ""}\
-    <h2 style="-webkit-text-fill-color: #f2f2f2">${terrData.oreStorage} Ore Stored</h2>\
+    ${terrData.oreStorage ? `<h2 style="-webkit-text-fill-color: #f2f2f2">${terrData.oreStorage} Ore Stored</h2>` : ""}\
     ${terrData.woodProd ? `<h2 style="-webkit-text-fill-color: #ff8c1a">+${terrData.woodProd} Wood</h2>` : ""}\
-    <h2 style="-webkit-text-fill-color: #ff8c1a">${terrData.woodStorage} Wood Stored</h2>\
+    ${terrData.woodStorage ? `<h2 style="-webkit-text-fill-color: #ff8c1a">${terrData.woodStorage} Wood Stored</h2>` : ""}\
     ${terrData.fishProd ? `<h2 style="-webkit-text-fill-color: #4d79ff">+${terrData.fishProd} Fish</h2>` : ""}\
-    <h2 style="-webkit-text-fill-color: #4d79ff">${terrData.fishStorage} Fish Stored</h2>\
+    ${terrData.fishStorage ? `<h2 style="-webkit-text-fill-color: #4d79ff">${terrData.fishStorage} Fish Stored</h2>` : ""}\
     ${terrData.cropProd ? `<h2 style="-webkit-text-fill-color: #ffc34d">+${terrData.cropProd} Crops</h2>` : ""}\
-    <h2 style="-webkit-text-fill-color: #ffc34d">${terrData.cropStorage} Crops Stored</h2>\
-    <h2>Treasury: <span style="-webkit-text-fill-color: ${getDifficultyColor(terrData.treasury)}">${terrData.treasury}</span></h2>\
-    <h2>Defences: <span style="-webkit-text-fill-color: ${getDifficultyColor(terrData.defences)}">${terrData.defences}</span></h2>\
+    ${terrData.cropStorage ? `<h2 style="-webkit-text-fill-color: #ffc34d">${terrData.cropStorage} Crops Stored</h2>` : ""}\
+    ${terrData.treasury ? `<h2>Treasury: <span style="-webkit-text-fill-color: ${getDifficultyColor(terrData.treasury)}">${terrData.treasury}</span></h2>` : ""}\
+    ${terrData.defences ? `<h2>Defences: <span style="-webkit-text-fill-color: ${getDifficultyColor(terrData.defences)}">${terrData.defences}</span></h2>` : ""}\
     `: "";
   };
 
@@ -70,7 +72,12 @@ document.addEventListener('DOMContentLoaded', function () {
  
   var terrPolygons = {};
 
-  axios.get('http://localhost:3000/dummyData')
+  const urlParams = new URLSearchParams(window.location.search);
+  var dataType = urlParams.get("data");
+
+  dataType ? dataType = dataType : dataType = "apiData";
+
+  axios.get(endpoint+dataType)
     .then(response => {
       terrs = response.data;
       // draw terr outlines
@@ -86,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let gTagOverlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         gTagOverlay.setAttribute('xmlns', "http://www.w3.org/2000/svg");
         gTagOverlay.setAttribute(`viewBox`, `0 0 ${Math.abs(loc.startX - loc.endX)} ${Math.abs(loc.startZ - loc.endZ)}`);
-        gTagOverlay.innerHTML =`<text x="${Math.abs(loc.startX - loc.endX)*(0.04+(0.125*(4-terrs[i].guildTag.length)))}" y="${Math.abs(loc.startZ - loc.endZ)*0.6}" style="font: ${Math.abs(loc.startX - loc.endX)*0.35}px Poppins; fill: ${terrs[i].guildColor};">${terrs[i].guildTag}</text>`
+        gTagOverlay.innerHTML =`<text x="${Math.abs(loc.startX - loc.endX)*(0.04+(0.125*(4-terrs[i].guildTag.length)))}" y="${Math.abs(loc.startZ - loc.endZ)*0.6}" style="font: ${Math.min(Math.abs(loc.startX - loc.endX), Math.abs(loc.startZ - loc.endZ))*0.35}px Poppins; fill: ${terrs[i].guildColor};">${terrs[i].guildTag}</text>`
         L.svgOverlay(gTagOverlay, [[loc.startZ, loc.startX],[loc.endZ, loc.endX]]).addTo(map);
       }
       // draw conns

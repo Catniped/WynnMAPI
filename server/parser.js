@@ -68,12 +68,22 @@ function genHybridData(achievementData, apiData) {
       terr.acquired = apiTerrs[terrName].acquired;
       terr.guildColor = apiTerrs[terrName].guildColor;
 
-      terr.conns = terrDesc.substr(terrDesc.search(new RegExp("Trading Routes:", 'g'))+15).replace(new RegExp("[}\"]", 'g'),"").split("\\n§f- §7");
-      terr.conns.shift();
+      terr.conns = terrDataFile.territoryData[terrName].connections;
       let terrLoc = apiTerrs[terrName].location;
       terr.location = {startX: terrLoc.startX, startZ: terrLoc.startZ, endX: terrLoc.endX, endZ: terrLoc.endZ};
       
-      if (terrDesc.match(new RegExp("\\[(.*?)\\]", 'g'))[0].replace(new RegExp("[\\[\\]']", 'g'),"") != terr.guildTag) {terrs.push(terr); continue;}
+      if (terrDesc.match(new RegExp("\\[(.*?)\\]", 'g'))[0].replace(new RegExp("[\\[\\]']", 'g'),"") != terr.guildTag) {
+        let resources = terrDataFile.territoryData[terrName].resources
+
+        terr.emProd = resources.emeralds;
+        terr.oreProd = resources.ore;
+        terr.woodProd = resources.wood;
+        terr.fishProd = resources.fish;
+        terr.cropProd = resources.crops;
+
+        terrs.push(terr); 
+        continue;
+      }
 
       // non-api
 
@@ -177,23 +187,33 @@ function genHybridData(achievementData, apiData) {
 };
 
 function genApiData(apiData) {
-  let apiTerrs = apiData.data.territories;
+  let apiTerrs = Object.entries(apiData.data.territories);
   let terrs = [];
-  for (terrNum = 1; terrNum < apiTerrs.length; terrNum++) {
+  for (terrNum = 0; terrNum < apiTerrs.length; terrNum++) {
     let terr = new Territory();
-    
-    terr.name = apiTerrs[terrNum].name;
-    terr.guild = apiTerrs[terrNum].guild;
-    terr.guildTag = apiTerrs[terrNum].guildPrefix;
-    terr.acquired = apiTerrs[terrNum].acquired;
-    terr.guildColor = apiTerrs[terrNum].guildColor;
 
-    terr.conns = terrDataFile.territoryData[terrName].connections;
-    let terrLoc = apiTerrs[terrName].location;
-    terr.location = {startX: terrLoc.startX, startZ: terrLoc.startZ, endX: terrLoc.endX, endZ: terrLoc.endZ};
+    terr.name = apiTerrs[terrNum][1].territory;
+    terr.guild = apiTerrs[terrNum][1].guild;
+    terr.guildTag = apiTerrs[terrNum][1].guildPrefix;
+    terr.acquired = apiTerrs[terrNum][1].acquired;
+    terr.guildColor = apiTerrs[terrNum][1].guildColor;
     
+    let resources = terrDataFile.territoryData[terr.name].resources
+
+    terr.emProd = resources.emeralds;
+    terr.oreProd = resources.ore;
+    terr.woodProd = resources.wood;
+    terr.fishProd = resources.fish;
+    terr.cropProd = resources.crops;
+
+    terr.conns = terrDataFile.territoryData[terr.name].connections;
+    let terrLoc = apiTerrs[terrNum][1].location;
+    terr.location = {startX: terrLoc.startX, startZ: terrLoc.startZ, endX: terrLoc.endX, endZ: terrLoc.endZ};
+
     terrs.push(terr);
-  }};
+  }
+  return(terrs);
+};
 
 exports.genHybridData = genHybridData;
 exports.genApiData = genApiData;
