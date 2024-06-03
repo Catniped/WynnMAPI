@@ -1,0 +1,28 @@
+{
+  "name": "wynnmapi",
+  "version": "1.0.0",
+  "description": "A Wynncraft API providing guild map data.",
+  "main": "./server/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Catniped/WynnMAPI.git"
+  },
+  "keywords": [
+    "Wynncraft"
+  ],
+  "author": "Catniped",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Catniped/WynnMAPI/issues"
+  },
+  "homepage": "https://github.com/Catniped/WynnMAPI#readme",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.0",
+    "helmet": "^7.1.0"
+  }
+}
