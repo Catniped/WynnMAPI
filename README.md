@@ -9,7 +9,7 @@ The website frontend is functional, with a few bugs/imperfections to be polishes
 
 This project is still under development, but is in a usable state, and i will start hosting the services as soon as i can. Everyone is free to contribute in the meantime.
 
-![An image of the map](https://github.com/Catniped/WynnMAPI/blob/a3fd767cacd96a554ee5754ad6acd91556e3168f/image.png)
+![An image of the map](https://github.com/Catniped/WynnMAPI/blob/a8517ee42ef3daf07097837a0be406ee9955c9c2/image.png)
 
 ## Usage
 ### API
