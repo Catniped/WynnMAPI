@@ -1,4 +1,4 @@
-const endpoint = "http://localhost:3000/"
+const endpoint = "https://wynnmapi.azurewebsites.net/"
 
 document.addEventListener('DOMContentLoaded', function () {
   var CRSPixel = L.Util.extend(L.CRS.Simple, {

@@ -7,7 +7,9 @@ However i started enjoying working on the frontend with leafletjs quite a bit, s
 API currently lacks full hybrid data generation functionality because of concerns for the compliance of using a scraper bot to get the ingame data with the rules. It may still however be used as a nice wrapper over the Wynntils Athena API, which may become even more useful as more features/datafields are added to the API.
 The website frontend is functional, with a few bugs/imperfections to be polisheshed, and a few features i have in mind to be added, but i am quite happy with how it looks and feels at the moment. 
 
-This project is still under development, but is in a usable state, and i will start hosting the services as soon as i can. Everyone is free to contribute in the meantime.
+This project is still under development, but is in a usable state. Everyone is free to contribute in the meantime.
+
+**The site and API are both up! Check out the map [here](https://catniped.xyz/wynnmap/), and access the API at [wynnmapi.azurewebsites.net](https://wynnmapi.azurewebsites.net/).**
 
 ![An image of the map](https://github.com/Catniped/WynnMAPI/blob/a8517ee42ef3daf07097837a0be406ee9955c9c2/image.png)
 
