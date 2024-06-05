@@ -25,8 +25,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
-  terrInfo.update = function (terrData) {
-    this._div.innerHTML = 
+  function getTimeDelta(t) {
+    let delta = Date.now() - t.getTime();
+
+    let days = Math.floor(delta / (1000 * 60 * 60 * 24));
+    let hours = Math.floor((delta % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    let minutes = Math.floor((delta % (1000 * 60 * 60)) / (1000 * 60));
+    let seconds = Math.floor((delta % (1000 * 60)) / 1000);
+
+    return(`${days ? `${days}d` : ""} ${hours ? `${hours}h` : ""} ${minutes ? `${minutes}m` : ""} ${seconds ? `${seconds}s` : ""}`)
+  };
+
+  var terrData;
+
+  terrInfo.update = function () {
+    terrInfo._div.innerHTML = 
     terrData ? `<h1>${terrData.name}</h1>\
     <h2 style="-webkit-text-fill-color: ${terrData.guildColor}">${terrData.guild} [${terrData.guildTag}]</h2>\
     ${terrData.emProd ? `<h2 style="-webkit-text-fill-color: #39ac39">+${terrData.emProd} Emeralds</h2>` : ""}\
@@ -41,18 +54,23 @@ document.addEventListener('DOMContentLoaded', function () {
     ${terrData.cropStorage ? `<h2 style="-webkit-text-fill-color: #ffc34d">${terrData.cropStorage} Crops Stored</h2>` : ""}\
     ${terrData.treasury ? `<h2>Treasury: <span style="-webkit-text-fill-color: ${getDifficultyColor(terrData.treasury)}">${terrData.treasury}</span></h2>` : ""}\
     ${terrData.defences ? `<h2>Defences: <span style="-webkit-text-fill-color: ${getDifficultyColor(terrData.defences)}">${terrData.defences}</span></h2>` : ""}\
+    ${terrData.acquired ? `<h2>Time held: <span style="-webkit-text-fill-color: #cccccc">${getTimeDelta(new Date(terrData.acquired))}</span></h2>` : ""}\
     `: "";
   };
 
   var focused = "";
 
   function setData(e) {
-    if (e.target.options.terrObj.name != focused) {focused = ""};
-    terrInfo.update(e.target.options.terrObj);
+    if (e.target.options.terrObj.name != focused) {focused = "";};
+    terrData = e.target.options.terrObj;
+    terrInfo.update();
   };
 
   function resetData(e) {
-    if (!focused) {terrInfo.update()};
+    if (!focused) {
+      terrData = undefined;
+      terrInfo.update();
+    };
   };
 
   function zoomToFeature(e) {
@@ -110,7 +128,9 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   map.fitBounds(bounds);
+  setInterval(terrInfo.update, 1000);
 });
+
 
 
 // console.log(apiData);
