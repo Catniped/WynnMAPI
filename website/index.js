@@ -123,43 +123,50 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  var apiResponse;
+
   function renderTerrs(treasuryColored) {
-  axios.get(endpoint+dataType)
-    .then(response => {
-      let terrPolygons = {};
-      terrs = response.data;
-      // draw terr outlines
-      for (i=0;i<terrs.length;i++) {
-        let loc = terrs[i].location;
-        let outline = new terrPolygon([[loc.startZ, loc.startX],[loc.startZ, loc.endX],[loc.endZ, loc.endX],[loc.endZ, loc.startX]], {color: treasuryColored ? getDifficultyColor(terrs[i].treasury) : terrs[i].guildColor, terrObj: terrs[i]});
-        outline.on("mouseover", setData);
-        outline.on("mouseout", resetData);
-        outline.on("click", zoomToFeature);
-        outline.addTo(map);
-        terrPolygons[terrs[i].name] = outline;
+    let terrPolygons = {};
+    terrs = apiResponse.data;
+    // draw terr outlines
+    for (i=0;i<terrs.length;i++) {
+      let loc = terrs[i].location;
+      let outline = new terrPolygon([[loc.startZ, loc.startX],[loc.startZ, loc.endX],[loc.endZ, loc.endX],[loc.endZ, loc.startX]], {color: treasuryColored ? getDifficultyColor(terrs[i].treasury) : terrs[i].guildColor, terrObj: terrs[i]});
+      outline.on("mouseover", setData);
+      outline.on("mouseout", resetData);
+      outline.on("click", zoomToFeature);
+      outline.addTo(map);
+      terrPolygons[terrs[i].name] = outline;
 
-        let gTagOverlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        gTagOverlay.setAttribute('xmlns', "http://www.w3.org/2000/svg");
-        gTagOverlay.setAttribute(`viewBox`, `0 0 ${Math.abs(loc.startX - loc.endX)} ${Math.abs(loc.startZ - loc.endZ)}`);
-        gTagOverlay.innerHTML =`<text x="${Math.abs(loc.startX - loc.endX)*(0.04+(0.125*(4-terrs[i].guildTag.length)))}" y="${Math.abs(loc.startZ - loc.endZ)*0.6}" style="font: ${Math.min(Math.abs(loc.startX - loc.endX), Math.abs(loc.startZ - loc.endZ))*0.35}px Poppins; fill: ${terrs[i].guildColor};">${terrs[i].guildTag}</text>`
-        L.svgOverlay(gTagOverlay, [[loc.startZ, loc.startX],[loc.endZ, loc.endX]]).addTo(map);
-      }
+      let gTagOverlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      gTagOverlay.setAttribute('xmlns', "http://www.w3.org/2000/svg");
+      gTagOverlay.setAttribute(`viewBox`, `0 0 ${Math.abs(loc.startX - loc.endX)} ${Math.abs(loc.startZ - loc.endZ)}`);
+      gTagOverlay.innerHTML =`<text x="${Math.abs(loc.startX - loc.endX)*(0.04+(0.125*(4-terrs[i].guildTag.length)))}" y="${Math.abs(loc.startZ - loc.endZ)*0.6}" style="font: ${Math.min(Math.abs(loc.startX - loc.endX), Math.abs(loc.startZ - loc.endZ))*0.35}px Poppins; fill: ${treasuryColored ? "#ffffff" : terrs[i].guildColor};">${terrs[i].guildTag}</text>`
+      L.svgOverlay(gTagOverlay, [[loc.startZ, loc.startX],[loc.endZ, loc.endX]]).addTo(map);
+    }
 
-      // draw conns
-      let renderedConns = [];
-      let terrPolygonsArray = Object.values(terrPolygons);
-      for (i=0;i<terrPolygonsArray.length;i++) {
-        for (p=0;p<terrPolygonsArray[i].options.terrObj.conns.length;p++) {
-          if (!renderedConns.includes(terrPolygonsArray[i].options.terrObj.conns[p])) {
-            L.polyline([terrPolygonsArray[i].getCenter(), terrPolygons[terrPolygonsArray[i].options.terrObj.conns[p]].getCenter()], {color: "white", weight: 1, opacity: 0.75}).addTo(map);
-          }
-          renderedConns.push(terrPolygonsArray[i].options.terrObj.name);
-        } 
-      }
-    })};
+    // draw conns
+    let renderedConns = [];
+    let terrPolygonsArray = Object.values(terrPolygons);
+    for (i=0;i<terrPolygonsArray.length;i++) {
+      for (p=0;p<terrPolygonsArray[i].options.terrObj.conns.length;p++) {
+        if (!renderedConns.includes(terrPolygonsArray[i].options.terrObj.conns[p])) {
+          L.polyline([terrPolygonsArray[i].getCenter(), terrPolygons[terrPolygonsArray[i].options.terrObj.conns[p]].getCenter()], {color: "white", weight: 1, opacity: 0.75}).addTo(map);
+        }
+        renderedConns.push(terrPolygonsArray[i].options.terrObj.name);
+      } 
+    }
+  };
   
-  renderTerrs();
+  function refresh() {
+    axios.get(endpoint+dataType)
+      .then(response => {
+        apiResponse = response;
+        renderTerrs();
+    })};
 
+  refresh();
+  
   treasuryCheckbox = document.querySelector("#treasury-colored");
   treasuryCheckbox.addEventListener("change", () => {
     clearMap();

@@ -18,6 +18,7 @@ class Territory {
     this.treasury;
     this.defences;
     this.conns;
+    this.externals;
     this.location;
     this.acquired;
     this.guildColor;
@@ -33,6 +34,14 @@ function getTreasury(t) {
   if (delta > 86400000) {return "Medium"};
   if (delta > 3600000) {return "Low"};
   return "None";
+};
+
+function getExternals(conns) {
+  let counter=0;
+  for (let i=0;i<conns.length;i++) {
+    counter+=(terrDataFile.territoryData[conns[i]].connections.length)-1;
+  };
+  return counter;
 };
 
 
@@ -81,6 +90,7 @@ function genHybridData(achievementData, apiData) {
       terr.guildColor = apiTerrs[terrName].guildColor;
 
       terr.conns = terrDataFile.territoryData[terrName].connections;
+      try {terr.externals = getExternals(terrDataFile.territoryData[terrName].connections);} catch {};
       let terrLoc = apiTerrs[terrName].location;
       terr.location = {startX: terrLoc.startX, startZ: terrLoc.startZ, endX: terrLoc.endX, endZ: terrLoc.endZ};
       
@@ -220,6 +230,7 @@ function genApiData(apiData) {
     terr.cropProd = resources.crops;
 
     terr.conns = terrDataFile.territoryData[terr.name].connections;
+    terr.externals = getExternals(terrDataFile.territoryData[terr.name].connections);
     let terrLoc = apiTerrs[terrNum][1].location;
     terr.location = {startX: terrLoc.startX, startZ: terrLoc.startZ, endX: terrLoc.endX, endZ: terrLoc.endZ};
 
