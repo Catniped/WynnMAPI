@@ -10,10 +10,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var map = L.map('map', {
     crs: CRSPixel,
     attributionControl: false,
-    minZoom: -5
+    minZoom: -3,
+    maxZoom: 0
   });
 
-  var terrInfo = L.control();
+  // terrinfo control
+  var terrInfo = L.control({position: "topright"});
 
   function getDifficultyColor(difficulty) {
     switch (difficulty) {
@@ -22,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
       case "Medium": return "#ffff00"
       case "High": return "#ff3300"
       case "Very High": return "#801a00"
+      default: return "#ffffff"
     }
   };
 
@@ -85,23 +88,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
   terrInfo.addTo(map);
 
+  //options control
+  var optionsControl = L.control({position: "bottomleft"});
+
+  optionsControl.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'optionsControl');
+    this._div.innerHTML = `
+    <input type="checkbox" id="treasury-colored" name="options" value="treasury-colored" />\
+    <label for="treasury-colored">Color by Treasury</label>
+    `
+    return this._div;
+  };
+
+  optionsControl.addTo(map);
+  
   var bounds = [[-6573,-2383], [-160,1650]];
   var image = L.imageOverlay('main-map.png', bounds).addTo(map);
  
-  var terrPolygons = {};
-
   const urlParams = new URLSearchParams(window.location.search);
   var dataType = urlParams.get("data");
 
   dataType ? dataType = dataType : dataType = "apiData";
 
+  function clearMap() {
+    for(i in map._layers) {
+        if(map._layers[i]._url != "main-map.png") {
+            try {
+                map.removeLayer(map._layers[i]);
+            }
+            catch(e) {
+                console.log("problem with " + e + map._layers[i]);
+            }
+        }
+    }
+  }
+
+  function renderTerrs(treasuryColored) {
   axios.get(endpoint+dataType)
     .then(response => {
+      let terrPolygons = {};
       terrs = response.data;
       // draw terr outlines
       for (i=0;i<terrs.length;i++) {
         let loc = terrs[i].location;
-        let outline = new terrPolygon([[loc.startZ, loc.startX],[loc.startZ, loc.endX],[loc.endZ, loc.endX],[loc.endZ, loc.startX]], {color: terrs[i].guildColor, terrObj: terrs[i]});
+        let outline = new terrPolygon([[loc.startZ, loc.startX],[loc.startZ, loc.endX],[loc.endZ, loc.endX],[loc.endZ, loc.startX]], {color: treasuryColored ? getDifficultyColor(terrs[i].treasury) : terrs[i].guildColor, terrObj: terrs[i]});
         outline.on("mouseover", setData);
         outline.on("mouseout", resetData);
         outline.on("click", zoomToFeature);
@@ -114,6 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
         gTagOverlay.innerHTML =`<text x="${Math.abs(loc.startX - loc.endX)*(0.04+(0.125*(4-terrs[i].guildTag.length)))}" y="${Math.abs(loc.startZ - loc.endZ)*0.6}" style="font: ${Math.min(Math.abs(loc.startX - loc.endX), Math.abs(loc.startZ - loc.endZ))*0.35}px Poppins; fill: ${terrs[i].guildColor};">${terrs[i].guildTag}</text>`
         L.svgOverlay(gTagOverlay, [[loc.startZ, loc.startX],[loc.endZ, loc.endX]]).addTo(map);
       }
+
       // draw conns
       let renderedConns = [];
       let terrPolygonsArray = Object.values(terrPolygons);
@@ -123,15 +154,18 @@ document.addEventListener('DOMContentLoaded', function () {
             L.polyline([terrPolygonsArray[i].getCenter(), terrPolygons[terrPolygonsArray[i].options.terrObj.conns[p]].getCenter()], {color: "white", weight: 1, opacity: 0.75}).addTo(map);
           }
           renderedConns.push(terrPolygonsArray[i].options.terrObj.name);
-        }
-        
+        } 
       }
-    });
+    })};
+  
+  renderTerrs();
+
+  treasuryCheckbox = document.querySelector("#treasury-colored");
+  treasuryCheckbox.addEventListener("change", () => {
+    clearMap();
+    renderTerrs(treasuryCheckbox.checked);
+  });
+
   map.fitBounds(bounds);
   setInterval(terrInfo.update, 1000);
 });
-
-
-
-// console.log(apiData);
-        

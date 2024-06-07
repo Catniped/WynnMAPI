@@ -24,6 +24,18 @@ class Territory {
   }
 }
 
+function getTreasury(t) {
+  date = new Date(t);
+  delta = Date.now() - date.getTime();
+  
+  if (delta > 1036800000) {return "Very High"};
+  if (delta > 432000000) {return "High"};
+  if (delta > 86400000) {return "Medium"};
+  if (delta > 3600000) {return "Low"};
+  return "None";
+};
+
+
 function dummyData() {
   var terr = new Territory;
   terr.name = "Ragni Main Entrance"
@@ -197,6 +209,7 @@ function genApiData(apiData) {
     terr.guildTag = apiTerrs[terrNum][1].guildPrefix;
     terr.acquired = apiTerrs[terrNum][1].acquired;
     terr.guildColor = apiTerrs[terrNum][1].guildColor;
+    terr.treasury = getTreasury(terr.acquired);
     
     let resources = terrDataFile.territoryData[terr.name].resources
 
